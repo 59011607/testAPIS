@@ -3,11 +3,161 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Football Predictions</title>
+    <title>Using Axios in Browser</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      /* Background color for status */
+      .status-win {
+        background-color: #a8e6cf; /* Green */
+      }
+      .status-lost {
+        background-color: #f7cac9; /* Red */
+      }
+      /* Remove background color for result */
+      .result-win {
+        color: #155724; /* Green */
+      }
+      .result-lost {
+        color: #721c24; /* Red */
+      }
+    </style>
   </head>
   <body>
-    <div id="predictions-container"></div>
+    <form id="queryForm">
+      <label for="isoDate">Choose a date:</label>
+      <input type="date" id="isoDate" name="isoDate" />
+
+      <label for="federation">Choose a federation:</label>
+      <select id="federation" name="federation">
+        <option value="AFC">AFC</option>
+        <option value="CAF">CAF</option>
+        <option value="CONCACAF">CONCACAF</option>
+        <option value="CONMEBOL">CONMEBOL</option>
+        <option value="OFC">OFC</option>
+        <option value="UEFA">UEFA</option>
+      </select>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Home Team</th>
+          <th>Away Team</th>
+          <th>Competition Name</th>
+          <th>Prediction</th>
+          <th>Competition Cluster</th>
+          <th>Start Date</th>
+          <th>Result</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="data"></tbody>
+    </table>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="test.js" type="module" defer></script>
+    <script>
+      document
+        .getElementById("queryForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const isoDate = document.getElementById("isoDate").value;
+          const federation = document.getElementById("federation").value;
+
+          try {
+            const data = await fetchData(isoDate, federation);
+            displayData(data);
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+      async function fetchData(isoDate, federation) {
+        const options = {
+          method: "GET",
+          url: "https://football-prediction-api.p.rapidapi.com/api/v2/predictions",
+          params: {
+            market: "classic",
+            iso_date: isoDate,
+            federation: federation,
+          },
+          headers: {
+            "X-RapidAPI-Key":
+              "2e1807bcd2msh8e14489fe28bb09p15f061jsn4007914ee683",
+            "X-RapidAPI-Host": "football-prediction-api.p.rapidapi.com",
+          },
+        };
+
+        const response = await axios.request(options);
+        return response.data;
+      }
+
+      function displayData(data) {
+        const dataBody = document.getElementById("data");
+        dataBody.innerHTML = ""; // Clear any existing data
+
+        data.data.forEach(match => {
+          const row = document.createElement("tr");
+
+          const homeTeamCell = document.createElement("td");
+          homeTeamCell.textContent = match.home_team;
+          row.appendChild(homeTeamCell);
+
+          const awayTeamCell = document.createElement("td");
+          awayTeamCell.textContent = match.away_team;
+          row.appendChild(awayTeamCell);
+
+          const competitionNameCell = document.createElement("td");
+          competitionNameCell.textContent = match.competition_name;
+          row.appendChild(competitionNameCell);
+
+          const predictionCell = document.createElement("td");
+          predictionCell.textContent = match.prediction;
+          row.appendChild(predictionCell);
+
+          const competitionClusterCell = document.createElement("td");
+          competitionClusterCell.textContent = match.competition_cluster;
+          row.appendChild(competitionClusterCell);
+
+          const startDateCell = document.createElement("td");
+          startDateCell.textContent = match.start_date;
+          row.appendChild(startDateCell);
+
+          const resultCell = document.createElement("td");
+          resultCell.textContent = match.result;
+          resultCell.classList.add(
+            match.result === "won" ? "result-win" : "result-lost"
+          ); // Add appropriate class based on result
+          row.appendChild(resultCell);
+
+          const statusCell = document.createElement("td");
+          statusCell.textContent = match.status;
+          statusCell.classList.add(
+            match.status === "won" ? "status-win" : "status-lost"
+          ); // Add appropriate class based on status
+          row.appendChild(statusCell);
+
+          dataBody.appendChild(row);
+        });
+      }
+
+      // Load data on initial page load
+      fetchData("2024-04-14", "UEFA")
+        .then(displayData)
+        .catch(error => console.error(error));
+    </script>
   </body>
 </html>

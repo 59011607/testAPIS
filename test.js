@@ -1,5 +1,3 @@
-// test.js
-import axios from 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js';
 async function fetchData() {
   const options = {
     method: "GET",

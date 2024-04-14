@@ -1,3 +1,6 @@
+// test.js
+import axios from "axios";
+
 async function fetchData() {
   const options = {
     method: "GET",
@@ -15,24 +18,10 @@ async function fetchData() {
 
   try {
     const response = await axios.request(options);
-    const predictions = response.data.predictions;
-    const predictionsContainer = document.getElementById(
-      "predictions-container"
-    );
-
-    // Clear existing content
-    predictionsContainer.innerHTML = "";
-
-    // Display predictions
-    predictions.forEach(prediction => {
-      const predictionElement = document.createElement("div");
-      predictionElement.textContent = `Match: ${prediction.match}, Prediction: ${prediction.prediction}`;
-      predictionsContainer.appendChild(predictionElement);
-    });
+    console.log(response.data);
   } catch (error) {
     console.error(error);
   }
 }
 
-// Call the fetchData function when the page loads
-window.onload = fetchData;
+fetchData();
